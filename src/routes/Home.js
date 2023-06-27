@@ -1,30 +1,30 @@
-import { addDoc, collection, getDocs, query } from "firebase/firestore";
+import { addDoc, collection, getDocs, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { dbService } from "../fbase";
 
-const Home = () => {
+const Home = ({ userObj }) => {
     const [nweet, setNweet] = useState("");
     const [nweets, setNweets] = useState([]);
-    const getNweets = async () => {
-        const q = query(collection(dbService, "nweets"));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((document) => {
-            const nweetObject = {
-                ...document.data(),
-                id: document.id,
-            };
-            setNweets((prev) => [nweetObject, ...prev]);
-        });
-    };
     useEffect(() => {
-        getNweets();
+        const q = query(
+            collection(dbService, "nweets"),
+            orderBy("createdAt", "desc"),
+        );
+        onSnapshot(q, (snapshot) => {
+            const nweetArr = snapshot.docs.map((document) => ({
+                id: document.id,
+                ...document.data(),
+            }));
+            setNweets(nweetArr);
+        })
     }, []);
     const onSubmit = async (e) => {
         e.preventDefault();
         try {
             const docRef = await addDoc(collection(dbService, "nweets"), {
-                nweet,
+                text: nweet,
                 createdAt: Date.now(),
+                creatorId: userObj.uid,
             });
             console.log("Document written with ID: ", docRef);
         } catch (error) {
@@ -57,7 +57,7 @@ const Home = () => {
             <div>
                 {nweets.map((nweet) => (
                     <div key={nweet.id}>
-                        <h4>{nweet.nweet}</h4>
+                        <h4>{nweet.text}</h4>
                     </div>
                 ))}
             </div>
