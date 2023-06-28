@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs, onSnapshot, orderBy, query } from "firebase/firestore";
+import { addDoc, collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import { dbService, storageService } from "../fbase";
 import Nweet from "../components/Nweet";
